@@ -1,0 +1,41 @@
+---
+title: "Help Page"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: sentence
+code-block-border-left: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
+```
+
+In this page you can find some helpful information in case you get lost in the functionality of Posit or `R`. In any case if you need to troubleshoot anything, please **do not hesitate to raise your hand and ask**!
+
+### The Posit Interface Died
+In the case that the Posit interfaces dies, you can follow the instructions on the screen to re-start it. If this happens, **all the variables within your session will disappear therefore functions will break**. If you already saved the results of the analysis in the `results.csv` file (on day 3) and the samples table in the `samples_table.csv` file (on day 1) you can run the following _directly from your `R` console_:
+
+```{r, eval=FALSE}
+# Load existing files for results and samples information
+res <- read.table("results.csv", sep = ",")
+samples <- read.table("samples_table.csv", sep = ",")
+```
+
+In this way, you should be able to run all the code starting from the <a href="../docs/pages/day3.html#Saving Results">"saving results" section</a>. In the **case you DID NOT have the files saved**, you will have to re-run everything before the point where your `R` session died, which should not really be a problem if you had _all the code written in a script_ since you can re-run it seamlessly.
+
+### The Posit RAM Is Full
+If you are using Posit and you see the `RAM` indicator on the upper right part of your screen <span style="color: red;">turning red</span>, you can try to do the following to solve the problem:
+
+```{r, eval=FALSE}
+# Clean up garbage (unused memory) 
+gc()
+
+# In the case we need to remove specific variables
+myvar <- c(1,2) # A variable
+rm(myvar) 
+```
+

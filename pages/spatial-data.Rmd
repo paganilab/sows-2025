@@ -1,0 +1,224 @@
+---
+title: "Spatial Data"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: sentence
+code-block-border-left: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
+```
+
+## Objectives
+- _Setup RStudio_
+- _Get familiar with the interface_
+- _Download relevant packages and set up the computing environment_
+- _Get an introduction to the type of data we are going to use_
+
+# Setup
+## Downloading the workshop contents
+In order to have everything ready to go through the exercises of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a fole download on your system. 
+
+> Keep track of the location of the download! We will now head into this folder using `R` through the `Rstudio` interface.
+
+## Initializing Rstudio
+Once RStudio is installed on your computer and opened, you should be able to see something like the following interface:
+
+<center>
+
+<img src="../src/rstudio_interface.png" width=800 />
+
+</center>
+
+This is your working interface, the **bottom right section** shows your _current file system_ which is now pointed to the place where the `Rproject` you just created lives. The **section on the left currently displays your console**, where **you can type `R` code _interactively_**. 
+
+## Creating a new R project for the workshop
+Go ahead and create a new `R project` by cliking on `File` > `New Project` and name it what you want. You can think of a project as a container of everything we will use during our workshop both in terms of files as well as `R` objects. Now, using the navigation menu on the bottom right, you should be able to head to the folder we just downloaded! You should see it contains a set of files including a folder named `data`.
+
+## Installing packages
+The analyses that we are going to conduct require specific **packages**. In R, **packages are _collections of functions_** which help us perform standardized workflows. In the **code chunk** below, we instruct R to install the packages that we will need later on throughout the workshop.
+
+> 💡
+> **Copy and paste this and the other _code chunks_ from here to your R script to follow.**
+
+```{r, eval=FALSE}
+# Install required packages for subsequent analyses
+source("../utils/installations.R")
+```
+
+During the installation, you will see many messages being displayed on your _`R` console_, don't pay too much attention to them unless they are <span style="color: red;">red and specify an error</span>!
+
+If you encounter any of these messages during installation, follow this procedure here:
+
+```{r, eval=FALSE}
+# R asks for package updates, answer "n" and type enter
+# Question displayed:
+Update all/some/none? [a/s/n]:
+
+# Answer to type:  
+n
+
+# R asks for installation from binary source, answer "no" and type enter
+# Question displayed:
+Do you want to install from sources the packages which need compilation? (Yes/no/cancel)
+
+# Answer to type:
+no
+```
+
+# Warm-up: Load the libraries
+Once everything is correctly installed, we can _load_ the required libraries that we will use during the workshop. Take this line and paste it in your console:
+
+```{r, eval=FALSE}
+# Install required packages for subsequent analyses
+source("../utils/load_libraries.R")
+```
+
+Hopefully all packages were correctly installed and now we can dive a bit deeper into the world of spatial data analysis!
+
+# An introduction to spatial profiling technologies
+
+presentation in PDF format
+
+# Data Loading and Exploratory Analyses
+
+## What data are we going to use? What is our question?
+As seen during the presentation, we will load data originally collected in [this study](https://www.nature.com/articles/s41467-024-47271-y) on High Grade Serous Ovarian Carcinoma (HGSOC). The original data supporting the findings of the study has been deposited on the **Gene Expression Omnibus** (GEO) data portal under accession number [GSE211956](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE211956).
+
+The data (like all data from Visium experiments) is built in the following way and stored in the `data` folder:
+
+- `barcodes.tsv`: the single-cell barcodes from the 10X GEMs
+- `features.tsv`: the set of genes profiled during the experiment (in the case of RNA-seq)
+- `matrix.mtx`: the actual cell-by-gene matrix with the count information
+
+## Loading The Data
+Once we know what to expect from the data, let's load it! We are going to use functions from the `Seurat` package to load our tabular and image data into `R` so we can start working with it.
+
+```{r}
+# Load the data using Seurat
+datadir <- '../data'
+count_matrix <- Read10X(datadir,
+              gene.column = 2,
+              cell.column = 1,
+              unique.features = TRUE,
+              strip.suffix = FALSE)
+
+# Turn matrix into SeuratObject
+sp <- CreateSeuratObject(counts = count_matrix,
+                        project = 'visium-hgsoc',
+                        assay='Visium10X')              
+```
+
+> 🤔 How many spots and genes are present in our counts table? _hint_: think of the type of experiment and the readout we are expecting!
+
+Let's take a look at the counts matrix up close:
+
+```{r}
+# Lets examine a few genes in the first thirty cells
+sp[['Visium10X']]$counts[c("CD3D", "TCL1A", "MS4A1"), 1:30]
+```
+
+The `.` values in the matrix represent 0s (no molecules detected). Since most values in an scRNA-seq matrix are 0, Seurat uses a **sparse-matrix representation** whenever possible. This results in significant memory and speed savings for Drop-seq/inDrop/10x data.
+
+Now that we have create it, our `sp` object acts as a container for all the information we need during the analysis, more specifically, the `SeuratObject` class is composed in the following way:
+
+<center>
+
+<img src="../src/sce.png" width=800 />
+
+</center>
+
+We can see its structure also by printing it directly on screen:
+
+```{r}
+# Lets see what the object looks like
+sp
+```
+
+We can also access our transcript information in the object by using the `[[` operator.
+
+```{r}
+# Lets see what the object looks like (we use the assay name given previously)
+sp[['Visium10X']]
+```
+
+> Now go ahead and check the cell metadata!
+>
+>```{r}
+>#| code-fold: true
+>head(sp@meta.data, 5)
+>```
+> 🤔 Do you find anything unexpected here?
+
+## Adding image data
+Metadata refers to that _class of accessory data_ to the main experimental readout. In the case of this published dataset, the _main_ data refers to the actual gene expression table with the associated counts measurement for each sample. Each sample then has associated information used to further describe it (e.g. type of cells, patient ID, treatment status, experimental batch...), as we have previously seen, this information is instrumental to bioinformaticians to avoid pitfalls in the analysis.
+In the case of our spatial data, we also have associated H&E images that we can use to overlay to actual mRNA information to aid interpretability of the results.
+Since we do not need it for any quantitative analysis, we are fine with loading a low-res image in `.png` format.
+
+```{r}
+# Let's load the image
+img <- Read10X_Image(image.dir = "../data/spatial/"
+                     , image.name = "tissue_lowres_image.png"
+                     , assay = '10Xspatial'
+                     , slice = 'slice1'
+                     , filter.matrix = TRUE # This is used to retain only spots "on tissue"
+                     )
+img
+```
+
+Now that we have loaded the image, we can put it inside our container object:
+
+```{r}
+# Assign image
+sp[['image']] <- img
+```
+
+# Compute custom quality metrics
+You will now compute a st of quality metrics that we will later visualize and use to filter the data to only keep high-quality cells!
+
+- Compute the percentage of reads that map to the mitochondrial genome (useful to detect stressed/dying cells)
+- Compute a measure of _transcriptional complexity_ per spot, ot the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated)
+- Add both to the `meta.data` slot of the `SeuratObject`
+
+```{r}
+#| code-fold: true
+# Compute the amount of mitochondrial reads, this is just the total reads mapping to mitochondrial genes over the total reads in the spot
+sp[["percent.mt"]] <- PercentageFeatureSet(sp, pattern = "^MT-")
+
+# Create an additional column in the metadata
+sp[['transcriptome.complexity']] <- sp@meta.data$nFeature_Visium10x / sp@meta.data$nCount_Visium10X
+```
+
+We can also plot relationships between quality metrics in the following way:
+
+```{r}
+# FeatureScatter is typically used to visualize feature-feature relationships, but can be used
+# for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
+plot1 <- FeatureScatter(sp, feature1 = "nCount_Visium10X", feature2 = "percent.mt")
+plot2 <- FeatureScatter(sp, feature1 = "nCount_Visium10X", feature2 = "nFeature_Visium10X")
+plot1 + plot2
+```
+
+# Display sample metadata
+Plot the sample with present metadata including number of features and number of counts and check their distributions!
+
+> 💡 Use the `SpatialFeaturePlot` function!
+
+```{r}
+#| code-fold: true
+# Display the spots on the tissue
+SpatialDimPlot(sp)
+```
+
+Here is our sample! We will now move towards filtering the sample and perform adequate quality control steps in the next page.
+
+# Recap 
+- Spatial technologies are many and diverse 
+- Spatial data can be boiled down to either sequencing-based or imaging-based approaches
+- Downloaded public Visium spatial data
+- Built a `SeuratObject` instance that we will use in subsequent analyses

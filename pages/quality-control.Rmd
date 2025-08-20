@@ -1,0 +1,89 @@
+---
+title: "Quality Control"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: sentence
+code-block-border-left: true
+---
+
+```{r setup, include=FALSE}
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
+```
+
+## Objectives
+- _Data normalization and filtering_
+- _Normalize and explore the data with functions provided by the `Seurat` and `Giotto` packages_
+- _Visual exploration of QC metrics over the sample_
+
+## Overview
+As in all bioinformatics analyses, we need to make sure that the data we are analyzing is as sound as possible. Biological data is especially noisy and chaotic by its very nature, hence it is important to perform proper quality control (**QC**) steps and filtering.
+
+### Why filter?
+Filtering can help remove low-quality cells/spots that would otherwise introduce technical noise. For example, the presence of spots with lower numbers of features detected than other good quality spots can influence the clustering into groupings driven by total expression detected (UMIs) rather than by actual transcriptional content. Spots can also be considered low quality if they show signs of being poorly representative of the biological activity being studied. Some examples are cells that are actively dying (high mitochondrial gene expression) or observations that are actually doublets (in the case of single cell RNA-seq or imaging-based technologies).
+Removing these sources of non-relevant variation represents a key step for downstream analyses, improving the ration of biological signal relative to technical noise.
+
+### Special considerations with spatial data
+while filtering is beneficial in all usual single-cell analyses, spatial data requires an additional level of consideration. Removing a poor quality cell from a spatial network corresponds to removing a data point from its native environment. 
+
+> 🚨 If done without proper caution, this could damage our understanding of spatial niche makeup and cell-cell crosstalk!
+
+## QC Thresholds
+Filtering can be performed in many ways and using combinations of covariates to make sure we are retaining cells/spots we think are interesting for the sake of the analysis. Take note that this is a very analysis-based step! In our case, we are going to filter spots based on the amount of genes they encode and their total UMI content.
+
+> 💡 To get a feeling for what could be sensible thresholds to use for filtering, we have to get an idea of the average UMIs and genes!
+
+- Go ahead and compute the average UMI value and gene values per spot, what are these values?
+- Once you have them, think of a value that makes sense to use as a filtering threshold, keeping all cells above it for further analysis
+
+## Filtering
+Once we have our filtering values sorted out, we need to actually filter our _bad_ spots. Firstly though, since we are dealing with spatial data, we want to check whether the filtering we are applying could end up tampering with the original spatial organization of the sample!
+
+- Compute an additional `meta.data` column named `to_keep` which contains values `TRUE` or `FALSE`. If a spot passes QC then gets assigned a `TRUE` else it is flagged by a `FALSE`
+- Plot the new column over the sample and check where spots that would be discarded are located
+- Determine a quantile-based approach to filter spots based on the `nCount_Visium10X` and `nFeature_Visium10X` columns, keeping only spots above the 25% quantile for both measures
+- How many spots would be filtered out?
+
+```{r}
+# here put outputs but hide code!
+genesq <- quantile(sp@meta.data$nFeature_Visium10X)['25%']
+umisq <- quantile(sp@meta.data$nCount_Visium10X)['25%']
+
+# Build `to_keep` column
+
+```
+
+Once we are done, we can actually filter the sample!
+
+```{r}
+#| code-fold: true
+# Let's filter based on a dynamic quantile threshold for both UMIs and number of genes
+sp <- subset(sp, subset = nFeature_Visium10X > genesq & nFeature_Visium10X > umisq)
+```
+
+- Now check that the filtering actually returned the expected amount of spots 
+
+## Normalization
+After the removal of unwanted spots from the dataset, it's time to _normalize_ it. What this step tries to achieve is the removal of unwanted differences across spots given by their varying _library sizes_. More specifically, we use the `NormalizeData` function from `Seurat` that normalizes the feature expression measurements for each cell by the total expression, multiplies this by a scale factor (10,000 by default), and log-transforms the result. Normalized expression values are then stored in `sp[["RNA"]]$data`.
+
+- Use the `NormalizeData` function from `Seurat` to normalize the expression levels in our sample
+
+```{r}
+sp <- NormalizeData(sp, normalization.method = "LogNormalize", scale.factor = 10000)
+```
+
+## Selection of Highly-variable features
+
+
+
+## Clustering (spatially-unaware)
+
+## Identification of spatial domains (put this in downstream)
+
+## Cell type enrichment of spots
+
+## Recap

@@ -1,0 +1,40 @@
+project:
+  type: website
+  output-dir: docs # For pages publishing
+
+# Top navbar
+website:
+  favicon: ./src/icon.png
+  title: "Spatial Biology Workshop"
+  navbar:
+    logo: ./src/icon.png
+    left:
+      - href: ./pages/index.Rmd
+        text: Home
+      - href: ./pages/spatial-data.Rmd
+        text: Spatial Data
+      - href: ./pages/quality-control.Rmd
+        text: Quality Control
+      - href: ./pages/downstream-analyses.Rmd
+        text: Spatial Analyses
+      - href: ./pages/help.Rmd
+        text: Help  
+    right: 
+      - icon: github
+        href: https://github.com/paganilab
+      - icon: twitter
+        href: https://twitter.com/LabPagani
+  page-footer: "Copyright 2025, Mattia Toninelli"
+
+# Themes, can be changed with .css files and .scss 
+format:
+  html:
+    theme: 
+      - yeti
+      - sass_styling.scss
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+
+# Code theme
+highlight-style: github

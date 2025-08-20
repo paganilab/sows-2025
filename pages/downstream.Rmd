@@ -1,0 +1,23 @@
+---
+title: "Downstream Analyses"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: sentence
+code-block-border-left: true
+---
+
+```{r setup, include=FALSE}
+library(kableExtra)
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
+```
+
+## Objectives
+- _Identification of spatially-coordinated genes_
+- _Spot celltype deconvolution_
+- _Ligand-receptor inference analysis with `LIANA`_
+
+## Overview

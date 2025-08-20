@@ -1,0 +1,62 @@
+---
+title: "Introduction"
+author: "Mattia Toninelli"
+date: last-modified 
+output: html_document
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
+```
+
+## 👋🏻 What is this workshop about? 
+The course will give an overview on how to **tackle the analysis of spatial molecular data**. During the workshop we will dive into a **spatial transcriptomics experiment** and carry out the main steps of a standard data analysis pipeline.
+
+<center>
+
+<img src="../pics/rnaseq_workflow.png" width=800 />
+
+</center>
+
+# Program Outline
+
+## Introduction 
+- Setup RStudio
+- Get familiar with the interface
+- Download relevant packages and set up the computing environment
+- Get an introduction to the type of data we are going to use
+
+## Overview of the data and QC
+- Learn about data normalization and filtering
+- Explore different normalization methods
+- Normalize and explore the data with functions provided by the `Seurat` and `Giotto` packages
+- Clustering
+- Cell type profile decomposition and spot enrichment
+
+## Downstream analyses leveraging spatial information
+- Identification of spatially-coordinated genes
+- Identification of spatially-aware spot domains
+- Ligand-receptor inference analysis with `LIANA`
+
+## How To Reach Us
+
+- `Lorenzo Drufuca` (anna.beneggi@ifom.eu)
+- `Mattia Toninelli` (mattia.toninelli@ifom.eu)
+
+<center>
+
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2799.3904457401086!2d9.203071399999999!3d45.44178759999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4786c43e4304a3f5%3A0x80ca5dcc8bef68!2sIFOM%20%E2%80%A2%20Istituto%20Fondazione%20di%20Oncologia%20Molecolare%20ETS!5e0!3m2!1sit!2sit!4v1680169870014!5m2!1sit!2sit" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+**Feel free to drop us an e-mail if you have any curiosity or question!**
+
+</center>
+
+# Credits
+Some of the images and inspiration came from other tutorials available online, in particular [this work](tmp) for images and [this work](tmp) for some of the information regarding data normalization. All of the code present within this site was developed and is readily implementable in [RStudio](https://posit.co/) using [RMarkdown](https://rmarkdown.rstudio.com/) and [R](https://www.r-project.org/)>4.4.0.
+
+# License
+All of the material in this course is under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (_CC BY 4.0_) which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.
