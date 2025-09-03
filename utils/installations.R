@@ -28,7 +28,7 @@ needed_packages_cran <- c(
     "scatterpie",
     "R.utils",
     "qs",
-    "clustermole"
+    "clustermole",
     "smfishHmrf",
     "terra")
 

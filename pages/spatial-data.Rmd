@@ -38,19 +38,18 @@ Once RStudio is installed on your computer and opened, you should be able to see
 This is your working interface, the **bottom right section** shows your _current file system_ which is now pointed to the place where the `Rproject` you just created lives. The **section on the left currently displays your console**, where **you can type `R` code _interactively_**. 
 
 ## Creating a new R project for the workshop
-Go ahead and create a new `R project` by cliking on `File` > `New Project` and name it what you want. You can think of a project as a container of everything we will use during our workshop both in terms of files as well as `R` objects. Now, using the navigation menu on the bottom right, you should be able to head to the folder we just downloaded! You should see it contains a set of files including a folder named `data`.
+Go ahead and create a new `R project` by cliking on `File` > `New Project` and name it what you want. You can think of a project as a container of everything we will use during our workshop both in terms of files as well as `R` objects. When you create the project, select the option to create it from an existing folder, and use the folder you just downloaded which should be named `sows-2025-master` to initialize it.
+Now, using the navigation menu on the bottom right, you should be able to head to the folder we just downloaded! You should see it contains a set of files including a folder named `data`. To make sure that everything is working properly, run the following command in your console `getwd()` and **make sure that the output path that is returned ends with `sows-2025-master`!**
 
 ## Installing packages
 The analyses that we are going to conduct require specific **packages**. In R, **packages are _collections of functions_** which help us perform standardized workflows. In the **code chunk** below, we instruct R to install the packages that we will need later on throughout the workshop.
-
-First, run the following command in your console `getwd()` and **make sure that the output path that is returned ends with `SOWS-2025`!**
 
 > 💡
 > **Copy and paste this and the other _code chunks_ from here to your R script to follow.**
 
 ```{r, eval=FALSE}
 # Install required packages for subsequent analyses
-source("../utils/installations.R")
+source("./utils/installations.R")
 ```
 
 During the installation, you will see many messages being displayed on your _`R` console_, don't pay too much attention to them unless they are <span style="color: red;">red and specify an error</span>!
@@ -76,9 +75,14 @@ no
 # Warm-up: Load the libraries
 Once everything is correctly installed, we can _load_ the required libraries that we will use during the workshop. Take this line and paste it in your console:
 
-```{r}
+```{r, include=FALSE}
 # Install required packages for subsequent analyses
 source("../utils/load_libraries.R")
+```
+
+```{r, eval=FALSE}
+# Install required packages for subsequent analyses
+source("./utils/load_libraries.R")
 ```
 
 Hopefully all packages were correctly installed and now we can dive a bit deeper into the world of spatial data analysis!
@@ -105,9 +109,14 @@ The data (like all data from Visium experiments) is built in the following way a
 ## Loading The Data
 Once we know what to expect from the data, let's load it! We are going to use functions from the `Seurat` package to load our tabular and image data into `R` so we can start working with it.
 
-```{r}
-# Load the data using Seurat
+```{r, include=FALSE}
+# Load the data using Seurat (first set the proper data directory path)
 datadir <- '../data'
+```
+```{r}
+# Load the data using Seurat (first set the proper data directory path)
+datadir <- './data'
+
 count_matrix <- Read10X(datadir,
               gene.column = 2,
               cell.column = 1,
@@ -129,7 +138,7 @@ Let's take a look at the counts matrix up close:
 sp[['Visium10X']]$counts[c("CD3D", "TCL1A", "MS4A1"), 1:30]
 ```
 
-The `.` values in the matrix represent 0s (no molecules detected). Since most values in an scRNA-seq matrix are 0, Seurat uses a **sparse-matrix representation** whenever possible. This results in significant memory and speed savings for Drop-seq/inDrop/10x data.
+The `.` values in the matrix represent 0s (no molecules detected). Since most values in an scRNA-seq matrix are 0, Seurat uses a **sparse-matrix representation** whenever possible. This results in significant memory and speed savings for Drop-seq/inDrop/10X data.
 
 Now that we have create it, our `sp` object acts as a container for all the information we need during the analysis, more specifically, the `SeuratObject` class is composed in the following way:
 

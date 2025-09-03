@@ -41,18 +41,18 @@ gobj <- seuratToGiottoV5(sp, spatial_assay = 'Visium10X')
 ```{r}
 # create spatial network
 gobj <- createSpatialNetwork(gobject = gobj,
-+                                      method = "kNN", 
-+                                      k = 6,
-+                                      maximum_distance_knn = 400,
-+                                      name = "spatial_network")
+                                method = "kNN", 
+                                     k = 6,
+                                     maximum_distance_knn = 400,
+                                     name = "spatial_network")
 ```
 
 ```{r}
 # Plot spatial network
 spatPlot2D(gobject = gobj,  
-+            show_network= TRUE,
-+            network_color = "blue", 
-+            spatial_network_name = "spatial_network")
+            show_network= TRUE,
+            network_color = "blue", 
+            spatial_network_name = "spatial_network")
 ```
 
 ```{r}
