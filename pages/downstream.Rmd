@@ -15,9 +15,285 @@ library(kableExtra)
 knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
 ```
 
-## Objectives
+## Objectives 🎯
 - _Identification of spatially-coordinated genes_
-- _Spot celltype deconvolution_
-- _Ligand-receptor inference analysis with `LIANA`_
+- _Identification of spatial domains_
+- _Ligand-receptor inference analysis with `CellChat`_
 
 ## Overview
+Now you will start to explore ways to use **spatial information** to gather conclusions from our sample. You might be thinking of questions like:
+
+- _Are there genes that display a specific pattern of expression?_
+- _Are my clusters more or less spatially organized? Can we include spatial information while clustering spots?_
+- _What about cell-cell interactions across spots? Are there ways to check them out in spatial data?_
+
+You'll see in this part that most of these questions are readily answered after a few steps given our properly built dataset!
+
+## Spatially-variable genes with `Giotto`
+As we hae seen during the introduction, geographical data analysis approaches have been around for decades in the fields of economics and ecology. Ever since spatial profiling technologies were developed, researchers have re-purposed these mathematical approaches to study biological phenomena!
+One of the first applications initially developed for _smFISH_ data was to check whether genes/probes displayed a more or less spatially organized pattern in a statistically relevant manner.
+Methods like the Moran's _I_ or Getis-Ord _G_ indices are used to explore whether a variable (like gene expression values)
+
+```{r}
+gobj <- seuratToGiottoV5(sp, spatial_assay = 'Visium10X')
+```
+
+```{r}
+# create spatial network
+gobj <- createSpatialNetwork(gobject = gobj,
++                                      method = "kNN", 
++                                      k = 6,
++                                      maximum_distance_knn = 400,
++                                      name = "spatial_network")
+```
+
+```{r}
+# Plot spatial network
+spatPlot2D(gobject = gobj,  
++            show_network= TRUE,
++            network_color = "blue", 
++            spatial_network_name = "spatial_network")
+```
+
+```{r}
+# Spatially variable genes detection
+ranktest <- binSpect(gobj, 
+                     bin_method = "rank",
+                     calc_hub = TRUE, 
+                     hub_min_int = 5,
+                     spatial_network_name = "spatial_network")
+```
+
+- Inspect the resulting object, what are the top 5 most _spatially variable_ genes?
+- Plot them on the sample like shown below (_hint_: use the `spatFeatPlot2D` function)
+
+```{r}
+# Plot the top most spatially-variable genes, we need to first re-scale the data after transformation into giotto object
+gobj <- normalizeGiotto(gobj)
+spatFeatPlot2D(gobj, 
+               expression_values = "scaled",
+               feats = ranktest$feats[1:3], 
+               cow_n_col = 2, 
+               point_size = 1)
+```
+
+## Check out spatial modules of expression
+```{r}
+# Cluster the top 500 spatially variable genes into modules
+ext_spatial_genes <- ranktest[1:500,]$feats
+```
+
+```{r}
+# Compute gene-gene spatial correlation
+spat_cor_netw_DT <- detectSpatialCorFeats(
+    gobj,
+    method = "network",
+    spatial_network_name = "spatial_network",
+    subset_feats = ext_spatial_genes)
+```
+Cluster the features into 10 modules
+```{r}
+spat_cor_netw_DT <- clusterSpatialCorFeats(spat_cor_netw_DT, 
+                                           name = "spat_netw_clus", 
+                                           k = 10)
+```
+
+Plot the clusters
+```{r}
+heatmSpatialCorFeats(gobj,
+                     spatCorObject = spat_cor_netw_DT,
+                     use_clus_name = "spat_netw_clus",
+                     heatmap_legend_param = list(title = NULL))
+```
+
+Summarize the activity of modules into metascores at single spot level
+```{r}
+# Rank clusters (also plots cluster size vs rank dotplot)
+netw_ranks <- rankSpatialCorGroups(
+  gobj,
+  spatCorObject = spat_cor_netw_DT, 
+  use_clus_name = "spat_netw_clus")
+
+cluster_genes_DT <- showSpatialCorFeats(spat_cor_netw_DT, 
+                                        use_clus_name = "spat_netw_clus", 
+                                        show_top_feats = 1)
+
+# Get gene-clusters associations
+cluster_genes <- cluster_genes_DT$clus 
+names(cluster_genes) <- cluster_genes_DT$feat_ID
+
+# Create metagenes based on modules
+gobj <- createMetafeats(gobj, 
+                                feat_clusters = cluster_genes, 
+                                name = "cluster_metagene")
+```
+
+Plot metafeatures
+
+```{r}
+spatCellPlot(gobj,
+             spat_enr_names = "cluster_metagene",
+             cell_annotation_values = netw_ranks$clusters,
+             point_size = 1, 
+             cow_n_col = 5)
+```
+
+- Which are the top 5 genes for each spatial co-expression cluster?
+
+```{r}
+# Get a list of the top 30 co-expressed genes per cluster - hide this and have them work it out
+coexpr_dt <- data.table::data.table(
+  genes = names(spat_cor_netw_DT$cor_clusters$spat_netw_clus),
+  cluster = spat_cor_netw_DT$cor_clusters$spat_netw_clus)
+
+data.table::setorder(coexpr_dt, cluster)
+
+top30_coexpr_dt <- coexpr_dt[, head(.SD, 30) , by = cluster]
+
+spatial_genes <- top30_coexpr_dt$genes
+```
+
+## HRMF for spatial domains
+This is done on the top 30 genes per cluster
+```{r}
+HMRF_spatial_genes <- doHMRF(gobject = gobj,
+                            expression_values = "scaled",
+                            spatial_genes = spatial_genes, # This is your previous output! 
+                            k = 20,
+                            spatial_network_name = "spatial_network",
+                            betas = c(0, 10, 5),
+                            output_folder = "HMRF_res/")
+```
+
+Load up the results and insert them in the spatial object
+```{r}
+# Add results
+gobj <- addHMRF(gobject = gobj, 
+                        HMRFoutput = HMRF_spatial_genes,
+                        k = 20, 
+                        betas_to_add = c(0, 10, 20, 30, 40),
+                        hmrf_name = "HMRF")
+```
+
+- Display the resulting spatial domains you obtained (_hint_: try using the `spatPlot2D` function)
+- Calculate the proportions of the inferred cell types in each domain, does it make sense compared to the morphology of the sample?
+- Display cell type proportions across the identified domains using a heatmap (_hint_: see the `pheatmap` package)
+
+## Ligand-receptor activity inference with CellChat
+Ever since the widespread generation of scRNA-seq data, computational methods to infer cell-cell interaction events (CCI) have been developed based on co-expression of ligand- and receptor-encoding genes across clusters. Spatial techonologies deepen this analysis by giving us the chance to weight the inferred interaction by their actual spatial proximity, limiting the chance of identifying false positive results.
+
+We first take the original `SeuratObject` and create a `CellChat` object with its own class
+
+```{r}
+# Get normalized data matrix
+data.input = Seurat::GetAssayData(sp, slot = "data", assay = "Visium10X")
+
+# Source scale factors for um to px conversion
+# Of note, the 'spot_diameter_fullres' factor is different from the `spot` in Seurat object and thus users still need to get the value from the original json file. 
+scalefactors = jsonlite::fromJSON(txt = file.path("../data/spatial", 'scalefactors_json.json'))
+
+meta = data.frame(labels = Idents(sp), samples = "sample1", row.names = names(Idents(sp))) # manually create a dataframe consisting of the cell labels
+meta$samples <- factor(meta$samples)
+unique(meta$labels) # check the cell labels
+
+spatial.locs = GetTissueCoordinates(sp, scale = NULL, cols = c("imagerow", "imagecol"))[,c('x','y')] %>% as.matrix()
+
+spot.size = 65 # the theoretical spot size (um) in 10X Visium
+conversion.factor = spot.size/scalefactors$spot_diameter_fullres
+spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
+
+d.spatial <- computeCellDistance(coordinates = spatial.locs, ratio = spatial.factors$ratio, tol = spatial.factors$tol)
+min(d.spatial[d.spatial!=0]) # this value should approximately equal 100um for 10X Visium data
+```
+
+Create a cellchat object
+```{r}
+# Create CellChat object
+cellchat <- createCellChat(object = data.input, meta = meta, group.by = "labels",
+                           datatype = "spatial", coordinates = spatial.locs, spatial.factors = spatial.factors)
+
+# Let's see it
+cellchat
+```
+
+Build a ligand-receptor database
+```{r}
+CellChatDB <- CellChatDB.human # use CellChatDB.human if running on human data
+```
+
+Take a look at it:
+```{r}
+dplyr::glimpse(CellChatDB$interaction)
+```
+
+- How many ligand-receptor pairs in the database refer to secretory signalling pathways? (_hint_: use the `showDatabaseCategory` function from `CellChat`)
+
+Prepare the expression data
+```{r}
+CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling", key = "annotation") # use Secreted Signaling
+
+cellchat@DB <- CellChatDB.use
+
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+future::plan("multisession", workers = 4) 
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat, variable.both = F)
+```
+
+Compute signalling networks
+```{r}
+# Compute communication probabilities
+cellchat <- computeCommunProb(cellchat, type = "truncatedMean", trim = 0.1,
+                              distance.use = TRUE, interaction.range = 250, scale.distance = 0.01,
+                              contact.dependent = TRUE, contact.range = 100, nboot=10)
+# Aggregate results
+cellchat <- aggregateNet(cellchat)
+```
+
+- Filter results to retain groups with more than 5 spots (_hint_: use the `filterCommunication` function)
+```{r, include=FALSE}
+cellchat <- filterCommunication(cellchat, min.cells = 5)
+```
+
+- Visualize the number of interactions detected and their strenght using _chord diagrams_ (_hint_: use the `netVisual_circle` function)
+```{r, echo=FALSE}
+par(mfrow = c(1,2), xpd=TRUE)
+# Number of interactions
+netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions")
+
+# Interaction strength
+netVisual_circle(cellchat@net$weight, vertex.weight = rowSums(cellchat@net$weight), weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
+```
+- Visualize pairwise interactions using a heatmap (_hint_: use the `netVisual_heatmap` function) 
+```{r, echo=FALSE}
+netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
+```
+- Which are the celltypes with the highest level of interactions?
+- Which are the top 3 interactions across tumor cells and fibroblasts?
+
+Let's compute the overall activity of CCI at the **pathway level**, in this case the goal is to summarize the interactions that we have retrieved to ones that pertain to specific intracellular pathways in order to get a sense of what is going on in communicating cells!
+
+```{r}
+cellchat <- computeCommunProbPathway(cellchat)
+```
+
+Let's now see the activity of a specific pathway:
+
+```{r}
+pathways.show <- c("IGF") 
+# Circle plot
+par(mfrow=c(1,1), xpd = TRUE) 
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+```
+
+- Plot this in space as well like shown below (_hint_: use the `netVisual_aggregate` function)
+
+We can additionally plot a "binarized" sender/receiver version of the plot above for a specific pathway:
+
+```{r}
+# Take an input of a ligand-receptor pair and show expression in binary
+spatialFeaturePlot(cellchat, pairLR.use = "IGF1_IGF1R", point.size = 1, do.binary = TRUE, cutoff = 0.05, enriched.only = F, color.heatmap = "Reds", direction = 1)
+```
+
+## Recap
+

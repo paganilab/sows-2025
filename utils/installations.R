@@ -27,8 +27,11 @@ needed_packages_cran <- c(
     "harmony",
     "scatterpie",
     "R.utils",
-    "qs"
-)
+    "qs",
+    "clustermole"
+    "smfishHmrf",
+    "terra")
+
 
 # Bioconductor
 bioc_dependencies <- c(
@@ -37,7 +40,9 @@ bioc_dependencies <- c(
     "SpatialExperiment",
     "ggspavis",
     "scater",
-    "nnSVG"
+    "nnSVG",
+    "GSVA",
+    "singscore"
 )
 
 
@@ -46,22 +51,13 @@ pak::pkg_install(c(bioc_dependencies,
 
 # Github
 github_packages <- c(
-    "satijalab/seurat-data"
+    "satijalab/seurat-data",
+    "drieslab/Giotto",
+    "drieslab/GiottoData",
+    "jinworks/CellChat",
+    "immunogenomics/presto"
 )
 pak::pkg_install(github_packages)
 
-# Giotto installation
-install.packages("terra")
-pak::pak("drieslab/Giotto")
-pak::pak("drieslab/GiottoData")
-
-# Liana installation
-pak::pkg_install("saezlab/liana")
-
-# Ensure the Python environment for Giotto has been installed.
-#genv_exists <- Giotto::checkGiottoEnvironment()
-
-#if (!genv_exists) {
-#    # The following command need only be run once to install the Giotto environment.
-#    Giotto::installGiottoEnvironment()
-#}
+# Setup for giotto python packages (HRMF)
+reticulate::py_install(envname = "~/.virtualenvs/giotto_env", packages = c("smfishhmrf"), pip = TRUE)

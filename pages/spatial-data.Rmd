@@ -14,7 +14,7 @@ code-block-border-left: true
 knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
 ```
 
-## Objectives
+## Objectives 🎯
 - _Setup RStudio_
 - _Get familiar with the interface_
 - _Download relevant packages and set up the computing environment_
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, messag
 
 # Setup
 ## Downloading the workshop contents
-In order to have everything ready to go through the exercises of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a fole download on your system. 
+In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a fole download on your system. 
 
 > Keep track of the location of the download! We will now head into this folder using `R` through the `Rstudio` interface.
 
@@ -42,6 +42,8 @@ Go ahead and create a new `R project` by cliking on `File` > `New Project` and n
 
 ## Installing packages
 The analyses that we are going to conduct require specific **packages**. In R, **packages are _collections of functions_** which help us perform standardized workflows. In the **code chunk** below, we instruct R to install the packages that we will need later on throughout the workshop.
+
+First, run the following command in your console `getwd()` and **make sure that the output path that is returned ends with `SOWS-2025`!**
 
 > 💡
 > **Copy and paste this and the other _code chunks_ from here to your R script to follow.**
@@ -74,7 +76,7 @@ no
 # Warm-up: Load the libraries
 Once everything is correctly installed, we can _load_ the required libraries that we will use during the workshop. Take this line and paste it in your console:
 
-```{r, eval=FALSE}
+```{r}
 # Install required packages for subsequent analyses
 source("../utils/load_libraries.R")
 ```
@@ -83,7 +85,11 @@ Hopefully all packages were correctly installed and now we can dive a bit deeper
 
 # An introduction to spatial profiling technologies
 
-presentation in PDF format
+[
+```{r out.height = "460px", out.width='800px', echo=F}
+knitr::include_graphics("../slides/spatial_intro.pdf")
+```
+](../slides/spatial_intro.pdf)
 
 # Data Loading and Exploratory Analyses
 
@@ -147,12 +153,13 @@ We can also access our transcript information in the object by using the `[[` op
 sp[['Visium10X']]
 ```
 
-> Now go ahead and check the cell metadata!
->
->```{r}
->#| code-fold: true
->head(sp@meta.data, 5)
->```
+Now go ahead and check the cell metadata!
+
+```{r}
+#| code-fold: true
+head(sp@meta.data, 5)
+```
+
 > 🤔 Do you find anything unexpected here?
 
 ## Adding image data
@@ -181,22 +188,21 @@ sp[['image']] <- img
 # Compute custom quality metrics
 You will now compute a st of quality metrics that we will later visualize and use to filter the data to only keep high-quality cells!
 
-- Compute the percentage of reads that map to the mitochondrial genome (useful to detect stressed/dying cells)
-- Compute a measure of _transcriptional complexity_ per spot, ot the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated)
+- Compute the percentage of reads that map to the mitochondrial genome, useful to detect stressed/dying cells (_hint_: use the `PercentageFeatureSet` function with the `^MT-` pattern)
+- Compute a measure of _transcriptional complexity_ per spot, or the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated) as a ratio between the `nFeature_Visium10X` and `nCount_Visium10X` columns in the metadata
 - Add both to the `meta.data` slot of the `SeuratObject`
 
-```{r}
-#| code-fold: true
+```{r, include=FALSE}
 # Compute the amount of mitochondrial reads, this is just the total reads mapping to mitochondrial genes over the total reads in the spot
 sp[["percent.mt"]] <- PercentageFeatureSet(sp, pattern = "^MT-")
 
 # Create an additional column in the metadata
-sp[['transcriptome.complexity']] <- sp@meta.data$nFeature_Visium10x / sp@meta.data$nCount_Visium10X
+sp[['transcriptome.complexity']] <- sp@meta.data$nFeature_Visium10X / sp@meta.data$nCount_Visium10X
 ```
 
-We can also plot relationships between quality metrics in the following way:
+- Plot relationships between quality metrics like shown below (_hint_: use the `FeatureScatter` function)
 
-```{r}
+```{r, echo=FALSE}
 # FeatureScatter is typically used to visualize feature-feature relationships, but can be used
 # for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
 plot1 <- FeatureScatter(sp, feature1 = "nCount_Visium10X", feature2 = "percent.mt")
@@ -220,5 +226,5 @@ Here is our sample! We will now move towards filtering the sample and perform ad
 # Recap 
 - Spatial technologies are many and diverse 
 - Spatial data can be boiled down to either sequencing-based or imaging-based approaches
-- Downloaded public Visium spatial data
+- Loaded and explored public Visium spatial data
 - Built a `SeuratObject` instance that we will use in subsequent analyses
