@@ -44,7 +44,8 @@ The course will give an overview on how to **tackle the analysis of spatial mole
 
 ## How To Reach Us
 
-- `Lorenzo Drufuca` (anna.beneggi@ifom.eu)
+- `Lorenzo Drufuca` (lorenzo.drufuca@ifom.eu)
+- `Anna Grattagliano` (anna.grattagliano@ifom.eu)
 - `Mattia Toninelli` (mattia.toninelli@ifom.eu)
 
 <center>
@@ -56,7 +57,7 @@ The course will give an overview on how to **tackle the analysis of spatial mole
 </center>
 
 # Credits
-Some of the images and inspiration came from other tutorials available online, in particular [this work](tmp) for images and [this work](tmp) for some of the information regarding data normalization. All of the code present within this site was developed and is readily implementable in [RStudio](https://posit.co/) using [RMarkdown](https://rmarkdown.rstudio.com/) and [R](https://www.r-project.org/)>4.4.0.
+Some of the images and inspiration came from other tutorials available online, in particular [this work](https://satijalab.org/seurat/articles/spatial_vignette.html) for the Seurat steps and [this work](https://drieslab.github.io/giotto_workshop_2024/introduction-to-the-giotto-package.html) for some of the information regarding the status of spatial data analysis and Giotto functions. Additionally, the overall low of the workshop was inspired by this work presented at an [earlier EMBO workshop](https://meetings.embo.org/event/24-cancer-bio). All of the code present within this site was developed and is readily implementable in [RStudio](https://posit.co/) using [RMarkdown](https://rmarkdown.rstudio.com/) and [R](https://www.r-project.org/)>4.4.0.
 
 # License
 All of the material in this course is under a [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (_CC BY 4.0_) which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.

@@ -1,5 +1,12 @@
-# MOBW2025
+# Spatial Omics Workshop 2025
+Here is the code needed for following along the workshop of the Summer School in Spatial Omics. 
+The website of the workshop is located [here](). This repository contains the data needed to perform all the analyses under the `data` folder.
 
-<img src="./pics/rnaseq_workflow.png" width=600 />
+## Software requirements
+The workshop relies on the use of `R >= 4.4` and `python > 3.8` so make sure to have these installed. The preferred choice of IDE is `RStudio`.
 
-Materials for the Bioinformatics Workshop in the Molecular Oncology course. The Workshop is articulated in three days and follows a standard RNA-seq **downstream data analysis workflow in `R`**, with a theoretical introduction to pre-processing steps.
+## Usage
+Download all the course material on your computer using the [following link](https://github.com/paganilab/sows-2025/archive/refs/heads/master.zip). Unzip the contents of the folder in your preferred location and navigate to it using the `RStudio` file interface.
+
+## Debugging and troubleshooting
+Please refere to the help page on the website for any known debugging steps during software installation phases.
