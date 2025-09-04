@@ -75,12 +75,7 @@ no
 # Warm-up: Load the libraries
 Once everything is correctly installed, we can _load_ the required libraries that we will use during the workshop. Take this line and paste it in your console:
 
-```{r, include=FALSE}
-# Install required packages for subsequent analyses
-source("../utils/load_libraries.R")
-```
-
-```{r, eval=FALSE}
+```{r}
 # Install required packages for subsequent analyses
 source("./utils/load_libraries.R")
 ```
@@ -91,7 +86,7 @@ Hopefully all packages were correctly installed and now we can dive a bit deeper
 
 [
 ```{r out.height = "460px", out.width='800px', echo=F}
-knitr::include_graphics("../slides/spatial_intro.pdf")
+knitr::include_graphics("./slides/spatial_intro.pdf")
 ```
 ](../slides/spatial_intro.pdf)
 
@@ -109,10 +104,6 @@ The data (like all data from Visium experiments) is built in the following way a
 ## Loading The Data
 Once we know what to expect from the data, let's load it! We are going to use functions from the `Seurat` package to load our tabular and image data into `R` so we can start working with it.
 
-```{r, include=FALSE}
-# Load the data using Seurat (first set the proper data directory path)
-datadir <- '../data'
-```
 ```{r}
 # Load the data using Seurat (first set the proper data directory path)
 datadir <- './data'
@@ -169,16 +160,16 @@ Now go ahead and check the cell metadata!
 head(sp@meta.data, 5)
 ```
 
-> 🤔 Do you find anything unexpected here?
+> 💡 See how Seurat has automatically created metadata fields related to number of genes and UMIs per spot?
 
 ## Adding image data
 Metadata refers to that _class of accessory data_ to the main experimental readout. In the case of this published dataset, the _main_ data refers to the actual gene expression table with the associated counts measurement for each sample. Each sample then has associated information used to further describe it (e.g. type of cells, patient ID, treatment status, experimental batch...), as we have previously seen, this information is instrumental to bioinformaticians to avoid pitfalls in the analysis.
-In the case of our spatial data, we also have associated H&E images that we can use to overlay to actual mRNA information to aid interpretability of the results.
+In the case of our spatial data, we also have **associated H&E images** that we can use to overlay to actual mRNA information to aid interpretability of the results.
 Since we do not need it for any quantitative analysis, we are fine with loading a low-res image in `.png` format.
 
 ```{r}
 # Let's load the image
-img <- Read10X_Image(image.dir = "../data/spatial/"
+img <- Read10X_Image(image.dir = "./data/spatial/"
                      , image.name = "tissue_lowres_image.png"
                      , assay = '10Xspatial'
                      , slice = 'slice1'
@@ -197,9 +188,9 @@ sp[['image']] <- img
 # Compute custom quality metrics
 You will now compute a st of quality metrics that we will later visualize and use to filter the data to only keep high-quality cells!
 
-- Compute the percentage of reads that map to the mitochondrial genome, useful to detect stressed/dying cells (_hint_: use the `PercentageFeatureSet` function with the `^MT-` pattern)
-- Compute a measure of _transcriptional complexity_ per spot, or the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated) as a ratio between the `nFeature_Visium10X` and `nCount_Visium10X` columns in the metadata
-- Add both to the `meta.data` slot of the `SeuratObject`
+- Compute the percentage of reads that map to the mitochondrial genome, useful to detect stressed/dying cells (_hint_: use the `PercentageFeatureSet` function with the `^MT-` pattern) and store the results in a metadata field called `percent.mt`
+- Compute a measure of _transcriptional complexity_ per spot, or the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated) as a ratio between the `nFeature_Visium10X` and `nCount_Visium10X` columns in the metadata and call it `transcriptome.complexity`
+- Check that they are both added to the `meta.data` slot
 
 ```{r, include=FALSE}
 # Compute the amount of mitochondrial reads, this is just the total reads mapping to mitochondrial genes over the total reads in the spot

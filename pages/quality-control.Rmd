@@ -23,8 +23,8 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, messag
 As in all bioinformatics analyses, we need to make sure that the data we are analyzing is as sound as possible. Biological data is especially noisy and chaotic by its very nature, hence it is important to perform proper quality control (**QC**) steps and filtering.
 
 ### Why filter?
-Filtering can help remove low-quality cells/spots that would otherwise introduce technical noise. For example, the presence of spots with lower numbers of features detected than other good quality spots can influence the clustering into groupings driven by total expression detected (UMIs) rather than by actual transcriptional content. Spots can also be considered low quality if they show signs of being poorly representative of the biological activity being studied. Some examples are cells that are actively dying (high mitochondrial gene expression) or observations that are actually doublets (in the case of single cell RNA-seq or imaging-based technologies).
-Removing these sources of non-relevant variation represents a key step for downstream analyses, improving the ration of biological signal relative to technical noise.
+Filtering can help remove low-quality cells/spots that would otherwise introduce technical noise. For example, the presence of spots with lower numbers of features detected than other good quality spots **can badly influence the clustering** into groupings driven by total expression detected (UMIs) rather than by actual transcriptional content. Spots can also be considered low quality if they show signs of being poorly representative of the biological activity being studied. Some examples are cells that are actively dying (high mitochondrial gene expression) or observations that are actually doublets (in the case of single cell RNA-seq or imaging-based technologies).
+Removing these sources of non-relevant variation represents a key step for downstream analyses, **improving the ratio of biological signal relative to technical noise**.
 
 ### Special considerations with spatial data
 while filtering is beneficial in all usual single-cell analyses, spatial data requires an additional level of consideration. Removing a poor quality cell from a spatial network corresponds to removing a data point from its native environment. 
@@ -43,7 +43,7 @@ Filtering can be performed in many ways and using combinations of covariates to 
 Once we have our filtering values sorted out, we need to actually filter our _bad_ spots. Firstly though, since we are dealing with spatial data, we want to check whether the filtering we are applying could end up tampering with the original spatial organization of the sample!
 
 - Determine a quantile-based approach to filter spots based on the `nCount_Visium10X` and `nFeature_Visium10X` columns, keeping only spots above the 10% percentile for both measures (let's call them `genesq` for the number of genes and `umisq` for the number of counts, we'll use these later!) - _hint_: use the `quantile` function.
-- Compute an additional `meta.data` column named `to_keep` which contains values `True` or `False`. If a spot passes QC then gets assigned a `True` else it is flagged by a `False`.
+- Compute an additional `meta.data` column named `to_keep` which contains values `Keep` or `Discard`. If a spot passes QC then gets assigned a `Keep` else it is flagged by a `Discard`. (_hint_: check out the `mutate` and `ifelse` function to create the column)
 - Plot the new column over the sample and check where spots that would be discarded are located
 - How many spots would be filtered out?
 
@@ -53,7 +53,7 @@ genesq <- quantile(sp@meta.data$nFeature_Visium10X, c(.1))['10%']
 umisq <- quantile(sp@meta.data$nCount_Visium10X, c(.1))['10%']
 
 # Build `to_keep` column
-sp@meta.data <- sp@meta.data %>% mutate('to_keep'= ifelse(nFeature_Visium10X >= genesq & nCount_Visium10X >= umisq, 'True', 'False'))
+sp@meta.data <- sp@meta.data %>% mutate('to_keep'= ifelse(nFeature_Visium10X >= genesq & nCount_Visium10X >= umisq, 'Keep', 'Discard'))
 ```
 
 ```{r}
@@ -61,21 +61,16 @@ sp@meta.data <- sp@meta.data %>% mutate('to_keep'= ifelse(nFeature_Visium10X >= 
 SpatialDimPlot(sp, group.by = 'to_keep')
 ```
 
+
 Once we are done, we can actually filter the sample!
 
-```{r, eval=FALSE}
-# Let's filter based on a dynamic quantile threshold for both UMIs and number of genes
-genesq <- NULL # Compute these values and substitute them here!
-umisq <- NULL
-```
-
-Once we have the thresholds, we can filter:
-
 ```{r}
-sp <- subset(sp, subset = to_keep == 'True')
+sp <- subset(sp, subset = to_keep == 'Keep')
 ```
 
 > 💡 Did the filtering actually returned the expected amount of spots? 
+
+**Filter genes as well!!**
 
 ## Normalization
 After the removal of unwanted spots from the dataset, it's time to _normalize_ it. What this step tries to achieve is the removal of unwanted differences across spots given by their varying _library sizes_. More specifically, we use the `NormalizeData` function from `Seurat` that normalizes the feature expression measurements for each cell by the total expression, multiplies this by a scale factor (10,000 by default) and log-transforms the result. Normalized expression values are then stored in `sp[["RNA"]]$data`.
@@ -91,13 +86,13 @@ Now that we have our filtered dataset, we are ready to start working on the spot
 
 To do so, try to implement the following steps in you code:
 
-- Use the `FindVariableFeatures` function from the `Seurat` package to detect highly-variable genes in the data and keep the top 2,000 genes using the `vst` method
-- Check which are the top 10 most variable genes in the data (_hint_: try the `VariableFeatures` function)
+- Use the `FindVariableFeatures` function from the `Seurat` package to detect highly-variable genes in the data and keep the top 4,000 genes using the `vst` method
+- Check which are the top 10 most variable genes in the data (_hint_: try a combination of the `head` and `VariableFeatures` function)
 - Plot the names of the top 50 highly-variable genes like shown below (_hint_: use the `VariableFeaturePlot` function)
 
 ```{r, include=FALSE}
 # Hide this one
-sp <- FindVariableFeatures(sp, selection.method = "vst", nfeatures = 2000)
+sp <- FindVariableFeatures(sp, selection.method = "vst", nfeatures = 4000)
 ```
 ```{r}
 # Top 10 most highly variable genes?
@@ -109,7 +104,7 @@ top10 <- head(VariableFeatures(sp), 10)
 ```
 
 ```{r, echo=FALSE}
-# plot variable features with and without labels ()
+# plot variable features with and without labels 
 plot1 <- VariableFeaturePlot(sp)
 plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
 plot1 + plot2
@@ -166,6 +161,7 @@ In order to choose we can generate what is known as an **Elbow plot**, a heurist
 ElbowPlot(sp)
 ```
 
+- Draw an elbow plot yourself (_hint_: use the convenient `ElbowPlot` function)
 - How many PCs will you choose based on the plot?
 
 ## Non-linear representation of the data (UMAP/t-SNE)
@@ -174,10 +170,7 @@ Linear representation of the data are very useful to perform interpretable dimen
 The first thing that we want to do is select the amount of PCs that we want to use to compute the transcriptional neighbors of each spot (i.e. other spots which have a very similar PCs profile). You should have figured this out by looking at the elbow plot above! 
 
 ```{r}
-ndims <- NULL # Put here your number of chosen PCs
-```
-```{r, include=FALSE}
-ndims <- 10
+ndims <- 10 # Put here your number of chosen PCs
 ```
 
 Let's compute the neighbors and UMAP embedding!
@@ -187,8 +180,8 @@ sp <- FindNeighbors(sp, dims = 1:ndims)
 sp <- RunUMAP(sp, dims = 1:ndims)
 ```
 
-- Plot the UMAP displaying the QC information we computed before (`nFeature_RNA`, `nCount_RNA` and `transcriptome.complexity`)
-- What do you think of the results? How does it compare to your expectation also based on your previous experience with UMAP applied to single-cell data?
+- Plot the UMAP displaying the QC information we computed before (`nFeature_RNA`, `nCount_RNA` and `transcriptome.complexity`) using the `FeaturePlot` function
+- What do you think of the results? How does it compare to your expectation also based on your previous experience with UMAP applied to single-cell data? Where you expecting more or less heterogeneity and diversity?
 
 ```{r, echo=FALSE}
 # Plot umap code for question above
@@ -227,7 +220,7 @@ These are my cluster identities for the top 5 cells in the data:
 head(Idents(sp), 5)
 ```
 
-## Find differentially expressed markers
+## Find differentially expressed marker genes
 Once we have identified a grouping for our spots, we can move on to check which are the transcriptional differences across these groups. The goal of this procedure is to start to _get a feeling for the biology_ behind the clusters we have identified.
 We can use the `FindAllMarkers` function to compute all marker genes for all spot clusters against all other spots at once. What this function does under the hood is to perform a statistical test (several are implemented in `Seurat`) for each gene and return the corresponding `p_val` and `log2FC` which describe the signficance and magnitude of the gene expression change in the categories we selected (i.e. cluster 1 _vs_ all others).
 
@@ -243,21 +236,21 @@ markers %>%
     arrange(desc(avg_log2FC)) %>%
     slice_head(n=5)
 ```
-- Plot the expression of one of the main markers across clusters (_hint_: use the `VlnPlot` function)
+- Plot the expression of one of the main markers across clusters like shown below (_hint_: use the `VlnPlot` function)
 ```{r, include=FALSE}
 VlnPlot(sp, features = c("KRT19", "COL1A1"))
 ```
-- Plot the expression of one of the main markers on a UMAP embedding
+- Plot the expression of one of the main markers on a UMAP embedding like shown below
 ```{r, include=FALSE}
 FeaturePlot(sp, features = c("KRT19", "COL1A1"))
 ```
 - Visualize the expression of the top 20 marker genes per cluster in a heatmap (_hint_: use the `DoHeatmap` function)
 ```{r, include=FALSE}
-markers %>%
+top10 <- markers %>%
     group_by(cluster) %>%
     dplyr::filter(avg_log2FC > 1) %>%
     slice_head(n = 20) %>%
-    ungroup() -> top10
+    ungroup() 
 
 DoHeatmap(sp, features = top10$gene) + NoLegend()
 ```
@@ -280,7 +273,8 @@ counts <- GetAssayData(object = sp, layer = 'data') %>% as.matrix()
 enr <- clustermole_enrichment(counts, species = "hs", method = 'ssgsea')
 
 # Filter results, keep only representative celltypes of interest OR celltypes in the `organ` Ovary
-ct_to_match = c('Macrophage','CD4+ T cell', 'CD8+ T cell', 'Mesenchymal cell', 'Epithelial cell', 'Myofibroblasts', 'Endothelial cell', 'Fibroblast')
+ct_to_match = c('Macrophage','CD4+ T cell', 'CD8+ T cell', 'Mesenchymal cell', 'Epithelial cell', 'Endothelial cell', 'Fibroblast')
+
 enr_wide <- enr %>% filter(species == 'Human') %>% filter(organ == 'Ovary' | celltype %in% ct_to_match) %>% tidyr::pivot_wider(.,id_cols=c("cluster"), names_from = 'celltype', values_from = 'score', values_fn = mean, values_fill = 0) %>% tibble::column_to_rownames("cluster")
 
 # Create a new column in metadata with labels from the enrichment (each spot is labelled for its highest score)
@@ -289,14 +283,14 @@ enr_wide$celltype <- names(enr_wide)[max.col(enr_wide)]
 # Add them to metadata
 sp@meta.data <- sp@meta.data %>% merge(enr_wide, by.y=0, by.x=0, all.x=TRUE) %>% tibble::column_to_rownames("Row.names")
 
-# Re-assign identities
-Idents(sp) <- sp@meta.data$celltype
-
-# Plot in space
-SpatialFeaturePlot(sp, features = ct_to_match[1:2])
 ```
 
-Let's now plot spatially the scores for specific gene signatures of interest!
+Let's now plot spatially the scores for specific gene signatures of interest like shown below!
+
+```{r}
+# Plot in space
+SpatialFeaturePlot(sp, features = ct_to_match[4:6])
+```
 
 - Draw a barplot using `ggplot2` highlighting the proportions of celltypes predicted across clusters in the sample
 - Based on the results above, can we confidently highlight a "tumor" cluster and a "stromal" one?
