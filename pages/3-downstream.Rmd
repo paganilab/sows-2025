@@ -11,6 +11,7 @@ code-block-border-left: true
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath('../'))
 knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
 ```
 
@@ -27,7 +28,12 @@ Now you will start to explore ways to use **spatial information** to gather conc
 - _What about cell-cell interactions across spots? Are there ways to check them out in spatial data?_
 
 You'll see in this part that most of these questions are readily answered after a few steps given our properly built dataset!
-
+```{r, include=FALSE}
+# Load libraries (this is required for Quarto rendering)
+source("./utils/load_libraries.R")
+# Load back seurat object
+sp <- readRDS("./data/seurat_obj_filtered.rds")
+```
 ## Spatially-variable genes with `Giotto`
 As we have seen during the introduction, geographical data analysis approaches have been around for decades in the fields of economics and ecology. Ever since spatial profiling technologies were developed, researchers have re-purposed these mathematical approaches to study biological phenomena!
 One of the first applications initially developed for _smFISH_ data was to check whether genes/probes displayed a more or less **spatially organized pattern** in a statistically relevant manner.
@@ -51,7 +57,7 @@ Then, we need to represent connections between spots in a way that the computer 
 gobj <- createSpatialNetwork(gobject = gobj,
                                 method = "kNN", 
                                      k = 6,
-                                     maximum_distance_knn = 400,
+                                     maximum_distance_knn = 300,
                                      name = "spatial_network")
 ```
 
@@ -72,20 +78,22 @@ We can now go ahead and detect spatially-variable genes in the data. `Giotto` im
 # Spatially variable genes detection
 ranktest <- binSpect(gobj, 
                      bin_method = "rank",
-                     calc_hub = TRUE, 
+                     calc_hub = TRUE,
+                     subset_feats = VariableFeatures(sp),
                      hub_min_int = 5,
                      spatial_network_name = "spatial_network")
 ```
 
-- Inspect the resulting object, what are the top 3 most _spatially variable_ genes?
-- Plot them on the sample like shown below (_hint_: use the `spatFeatPlot2D` function)
+**Q1.** Inspect the resulting object, what are the top 3 most _spatially variable_ genes?
+**Q2.** Plot them on the sample like shown below (_hint_: use the `spatFeatPlot2D` function)
 
 ```{r, echo=FALSE}
 spatFeatPlot2D(gobj, 
-               expression_values = "scaled",
-               feats = ranktest$feats[1:3], 
+               expression_values = "normalized",
+               feats = ranktest$feats[3:4],
+               cell_color_gradient = c('lightgrey','yellow','orange'),
                cow_n_col = 2, 
-               point_size = 1)
+               point_size = 1.5) 
 ```
 
 ## Check out spatial modules of expression
@@ -124,7 +132,7 @@ heatmSpatialCorFeats(gobj,
                      heatmap_legend_param = list(title = NULL))
 ```
 
-We can additionally summarize the activity of spatial modules into metascores at single spot level, this is equivalent to calculating a signature score at the single-spot level starting from th e lists of genes composing the modules. We expect to see a spatial patterning in the data.
+We can additionally summarize the activity of spatial modules into **metascores** at single spot level, this is equivalent to calculating a _signature score at the single-spot level_ starting from th e lists of genes composing the modules. We expect to see a spatial patterning in the data. We can additionally plot a figure to check out how many genes there are per module and how much they are intercorrelated!
 
 ```{r}
 # Rank clusters (also plots cluster size vs rank dotplot)
@@ -147,14 +155,14 @@ gobj <- createMetafeats(gobj,
                                 name = "cluster_metagene")
 ```
 
-- Plot metafeatures like shown below (_hint_: use the `spatCellPlot` function from the giotto package but specify `netw_ranks$clusters` in the `cell_annotation_value` option)
+- Plot metafeatures like shown below (_hint_: use the `spatCellPlot` function from the `Giotto` package but specify `netw_ranks$clusters` in the `cell_annotation_value` option)
 
 ```{r, echo=FALSE}
 spatCellPlot(gobj,
              spat_enr_names = "cluster_metagene",
-             cell_annotation_values = netw_ranks$clusters,
-             point_size = 1, 
-             cow_n_col = 5)
+             cell_annotation_values = netw_ranks$clusters[1:3],
+             point_size = 2, 
+             cow_n_col = 3)
 ```
 
 We can also compute a set of the 30 top-expressed genes per module to then use to subset out sample and perform spatially-informed clustering!
@@ -172,37 +180,37 @@ top30_coexpr_dt <- coexpr_dt[, head(.SD, 30) , by = cluster]
 spatial_genes <- top30_coexpr_dt$genes
 ```
 
-- Which are the top 3 genes for each spatial co-expression cluster?
+**Q1** Which are the top 3 genes for each spatial co-expression cluster?
 
 ## Spatial domain identification with spatially-informed clustering
 Now that we have a set of genes that we know display spatial patterns of expression, we can use these to group together cells with clustering like we have previously done. In this case, the results that we obtain will intrinsically retain spatial information, meaning that we can identify _spatially-guided_ results. We therefore start from the spatial genes to calculate again the principal components, umap, network and clustering!
 
 ```{r}
-gobj <- runPCA(gobject = gobj,
-                       feats_to_use = spatial_genes,
-                       name = "custom_pca")
+# Perform PCA on features from spatially-variable genes
+sp <- Seurat::RunPCA(sp,
+            features = spatial_genes,
+            reduction.name = "custom_pca",
+            )
 
-gobj <- runUMAP(gobj, 
-                        dim_reduction_name = "custom_pca", 
-                        dimensions_to_use = 1:20,
-                        name = "custom_umap")
+# Re-compute UMAP embedding
+sp <- Seurat::FindNeighbors(sp, reduction='custom_pca', graph.name='custom_NN')
 
-gobj <- createNearestNetwork(gobject = gobj,
-                                     dim_reduction_name = "custom_pca",
-                                     dimensions_to_use = 1:20, 
-                                     k = 5,
-                                     name = "custom_NN")
 
-gobj <- doLeidenCluster(gobject = gobj, 
-                                network_name = "custom_NN",
-                                resolution = 0.15, 
-                                n_iterations = 1000,
-                                name = "custom_leiden")
+#sp <- Seurat::RunUMAP(sp, graph='custom_NN', reduction.name='custom_UMAP')
+
+# Cluster spots based on PCA neighbors from spatially-variable genes
+sp <- Seurat::FindClusters(sp, 
+                            graph.name = "custom_NN",
+                            cluster.name = "custom_clusters")
 ```
 
-- Display the resulting spatial domains you obtained (_hint_: try using the `spatPlot2D` function with the `custom_leiden` metadata field)
-- Calculate the results of the previous clusters with the clustering obtained now, how much is each previous cluster contained in the new ones?
-- Display cell type proportions across the identified domains using a heatmap (_hint_: see the `pheatmap` package)
+**Q2.** Display the resulting spatial domains you obtained (_hint_: try using the `SpatialDimPlot` function with the `custom_leiden` metadata field)
+**Q3.** Calculate the results of the previous clusters with the clustering obtained now, how much is each previous cluster contained in the new ones?
+**Q4.** Display cell type proportions across the identified domains using a heatmap (_hint_: see the `pheatmap` package)
+```{r, echo=FALSE}
+mat <- sp@meta.data %>% select(c('celltype','custom_clusters')) %>% table()
+pheatmap::pheatmap(mat, scale='row')
+```
 
 ## Ligand-receptor activity inference with CellChat
 Ever since the widespread generation of scRNA-seq data, computational methods to infer cell-cell interaction events (CCI) have been developed based on co-expression of ligand- and receptor-encoding genes across clusters. Spatial techonologies deepen this analysis by giving us the chance to weight the inferred interaction by their actual spatial proximity, limiting the chance of identifying false positive results.
@@ -219,7 +227,8 @@ data.input = Seurat::GetAssayData(sp, slot = "data", assay = "Visium10X")
 # Of note, the 'spot_diameter_fullres' factor is different from the `spot` in Seurat object and thus users still need to get the value from the original json file. 
 scalefactors = jsonlite::fromJSON(txt = file.path("./data/spatial", 'scalefactors_json.json'))
 
-meta = data.frame(labels = Idents(sp), samples = "sample1", row.names = names(Idents(sp))) # manually create a dataframe consisting of the cell labels
+# manually create a dataframe consisting of the cell labels, make sure to avoid 0 in the labels, so we create another column
+meta = data.frame(orig.labels = Idents(sp), samples = "sample1", row.names = names(Idents(sp))) %>% mutate(labels = paste0('cluster-',orig.labels))
 meta$samples <- factor(meta$samples)
 unique(meta$labels) # check the cell labels
 
@@ -281,13 +290,14 @@ Now we can compute interaction probabilities across clusters based on spatial pr
 # Compute communication probabilities across the originally identified cluster
 cellchat <- computeCommunProb(cellchat, type = "truncatedMean", trim = 0.1,
                               distance.use = TRUE, interaction.range = 250, scale.distance = 0.01,
-                              contact.dependent = TRUE, contact.range = 100, nboot=10, do.fast=TRUE)
+                              contact.dependent = TRUE, contact.range = 100, nboot=10)
 # Aggregate results
 cellchat <- aggregateNet(cellchat)
 ```
 
 - Visualize the number of interactions detected and their strenght using _chord diagrams_ like shown below (_hint_: use the `netVisual_circle` function)
-```{r, echo=FALSE}
+
+```{r}
 par(mfrow = c(1,2), xpd=TRUE)
 # Number of interactions
 netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count), weight.scale = T, label.edge= F, title.name = "Number of interactions")
@@ -296,11 +306,13 @@ netVisual_circle(cellchat@net$count, vertex.weight = rowSums(cellchat@net$count)
 netVisual_circle(cellchat@net$weight, vertex.weight = rowSums(cellchat@net$weight), weight.scale = T, label.edge= F, title.name = "Interaction weights/strength")
 ```
 - Visualize pairwise interactions using a heatmap (_hint_: use the `netVisual_heatmap` function) 
-```{r, echo=FALSE}
+
+```{r}
 netVisual_heatmap(cellchat, measure = "count", color.heatmap = "Blues")
 ```
-- Which are the celltypes with the highest level of interactions?
-- Which are the top 3 interactions across tumor cells and fibroblasts?
+
+**Q5.** Which are the clusters with the highest level of interactions? (_hint_: check out the `cellchatnet$count` object)
+**Q6.** Which are the top 3 interactions across `cluster-3` (Tumor) and `cluster-2` (Stroma/Fibroblasts)? (_hint_: use the `subsetCommunication` function from `CellChat`)
 
 Let's compute the overall activity of CCI at the **pathway level**, in this case the goal is to summarize the interactions that we have retrieved to ones that pertain to specific intracellular pathways in order to get a sense of what is going on in communicating cells!
 
@@ -308,22 +320,30 @@ Let's compute the overall activity of CCI at the **pathway level**, in this case
 cellchat <- computeCommunProbPathway(cellchat)
 ```
 
-Let's now see the activity of a specific pathway:
+Let's now see the activity of a specific pathway always using a _chord diagram_:
 
 ```{r}
-pathways.show <- c("IGF") 
+pathways.show <- c("FGF") 
 # Circle plot
 par(mfrow=c(1,1), xpd = TRUE) 
 netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
 ```
 
-- Plot this in space as well like shown below (_hint_: use the `netVisual_aggregate` function)
+**Q7.** Plot this in space as well like shown below (_hint_: use the `netVisual_aggregate` function)
+```{r, echo=FALSE}
+# Spatial plot
+par(mfrow=c(1,1))
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "spatial", edge.width.max = 2, vertex.size.max = 1, alpha.image = 0.2, vertex.label.cex = 3.5)
+```
 
 We can additionally plot a "binarized" sender/receiver version of the plot above for a specific pathway:
 
 ```{r}
 # Take an input of a ligand-receptor pair and show expression in binary
-spatialFeaturePlot(cellchat, pairLR.use = "IGF1_IGF1R", point.size = 1, do.binary = TRUE, cutoff = 0.05, enriched.only = F, color.heatmap = "Reds", direction = 1)
+p1 <- spatialFeaturePlot(cellchat, pairLR.use = "FGF18_FGFR4", point.size = 1, do.binary = TRUE, cutoff = 0.05, enriched.only = F, color.heatmap = "Reds", direction = 1)
+p2 <- spatialFeaturePlot(cellchat, pairLR.use = "CXCL9_ACKR1", point.size = 1, do.binary = TRUE, cutoff = 0.05, enriched.only = F, color.heatmap = "Reds", direction = 1)
+
+p1 + p2
 ```
 
 Congratulations! You made it all the way to the end of the workshop! 🥳

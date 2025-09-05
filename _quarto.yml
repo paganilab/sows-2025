@@ -1,5 +1,7 @@
 project:
   type: website
+  render:
+    - pages/*.Rmd 
   output-dir: docs # For pages publishing
 
 # Top navbar
@@ -9,16 +11,14 @@ website:
   navbar:
     logo: ./src/icon.png
     left:
-      - href: ./pages/index.Rmd
+      - href: ./pages/0-index.Rmd
         text: Home
-      - href: ./pages/spatial-data.Rmd
-        text: Spatial Data
-      - href: ./pages/quality-control.Rmd
+      - href: ./pages/1-spatial-data.Rmd
+        text: Load Spatial Data
+      - href: ./pages/2-quality-control.Rmd
         text: Quality Control
-      - href: ./pages/downstream-analyses.Rmd
+      - href: ./pages/3-downstream.Rmd
         text: Spatial Analyses
-      - href: ./pages/help.Rmd
-        text: Help  
     right: 
       - icon: github
         href: https://github.com/paganilab

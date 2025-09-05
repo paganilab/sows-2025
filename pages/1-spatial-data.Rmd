@@ -11,6 +11,7 @@ code-block-border-left: true
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath('../'))
 knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, message = FALSE)
 ```
 
@@ -22,7 +23,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, messag
 
 # Setup
 ## Downloading the workshop contents
-In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a fole download on your system. 
+In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a file download on your system. 
 
 > Keep track of the location of the download! We will now head into this folder using `R` through the `Rstudio` interface.
 
@@ -76,7 +77,7 @@ no
 Once everything is correctly installed, we can _load_ the required libraries that we will use during the workshop. Take this line and paste it in your console:
 
 ```{r}
-# Install required packages for subsequent analyses
+# Load required packages for subsequent analyses
 source("./utils/load_libraries.R")
 ```
 
@@ -188,9 +189,8 @@ sp[['image']] <- img
 # Compute custom quality metrics
 You will now compute a st of quality metrics that we will later visualize and use to filter the data to only keep high-quality cells!
 
-- Compute the percentage of reads that map to the mitochondrial genome, useful to detect stressed/dying cells (_hint_: use the `PercentageFeatureSet` function with the `^MT-` pattern) and store the results in a metadata field called `percent.mt`
-- Compute a measure of _transcriptional complexity_ per spot, or the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated) as a ratio between the `nFeature_Visium10X` and `nCount_Visium10X` columns in the metadata and call it `transcriptome.complexity`
-- Check that they are both added to the `meta.data` slot
+**Q1.** Compute the percentage of reads that map to the mitochondrial genome, useful to detect stressed/dying cells (_hint_: use the `PercentageFeatureSet` function with the `^MT-` pattern) and store the results in a metadata field called `percent.mt`
+**Q2.** Compute a measure of _transcriptional complexity_ per spot, or the total number of genes we can find per spot over the total number of spot UMIs (the two should be strongly correlated) as a ratio between the `nFeature_Visium10X` and `nCount_Visium10X` columns in the metadata and call it `transcriptome.complexity`
 
 ```{r, include=FALSE}
 # Compute the amount of mitochondrial reads, this is just the total reads mapping to mitochondrial genes over the total reads in the spot
@@ -200,7 +200,7 @@ sp[["percent.mt"]] <- PercentageFeatureSet(sp, pattern = "^MT-")
 sp[['transcriptome.complexity']] <- sp@meta.data$nFeature_Visium10X / sp@meta.data$nCount_Visium10X
 ```
 
-- Plot relationships between quality metrics like shown below (_hint_: use the `FeatureScatter` function)
+**Q3.** Plot relationships between quality metrics like shown below (_hint_: use the `FeatureScatter` function)
 
 ```{r, echo=FALSE}
 # FeatureScatter is typically used to visualize feature-feature relationships, but can be used
@@ -228,3 +228,8 @@ Here is our sample! We will now move towards filtering the sample and perform ad
 - Spatial data can be boiled down to either sequencing-based or imaging-based approaches
 - Loaded and explored public Visium spatial data
 - Built a `SeuratObject` instance that we will use in subsequent analyses
+
+```{r, include=FALSE}
+# Save Seurat object
+saveRDS(sp, file = "./data/seurat_obj.rds")
+```
