@@ -85,11 +85,10 @@ Hopefully all packages were correctly installed and now we can dive a bit deeper
 
 # An introduction to spatial profiling technologies
 
-[
+
 ```{r out.height = "460px", out.width='800px', echo=F}
-knitr::include_graphics("./slides/spatial_intro.pdf")
+knitr::include_graphics("../slides/spatial_intro.pdf")
 ```
-](../slides/spatial_intro.pdf)
 
 # Data Loading and Exploratory Analyses
 

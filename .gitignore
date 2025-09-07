@@ -1,5 +1,5 @@
 /.quarto/
-slides/
+**/*.key
 **/.DS_Store
 solutions_code.Rmd
 **.rds
