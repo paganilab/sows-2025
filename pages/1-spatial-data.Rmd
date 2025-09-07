@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', warning = FALSE, messag
 
 # Setup
 ## Downloading the workshop contents
-In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on [this link](githubdownloadlink). This should trigger a file download on your system. 
+In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on [this link](https://github.com/paganilab/sows-2025/archive/refs/heads/master.zip). This should trigger a file download on your system. 
 
 > Keep track of the location of the download! We will now head into this folder using `R` through the `Rstudio` interface.
 
@@ -85,10 +85,7 @@ Hopefully all packages were correctly installed and now we can dive a bit deeper
 
 # An introduction to spatial profiling technologies
 
-
-```{r out.height = "460px", out.width='800px', echo=F}
-knitr::include_graphics("../slides/spatial_intro.pdf")
-```
+Follow along on the slides for a brief intro on the kind of data we'll be using throughout the hands-on session!
 
 # Data Loading and Exploratory Analyses
 
@@ -101,7 +98,7 @@ The data (like all data from Visium experiments) is built in the following way a
 - `features.tsv`: the set of genes profiled during the experiment (in the case of RNA-seq)
 - `matrix.mtx`: the actual cell-by-gene matrix with the count information
 
-## Loading The Data
+## Loading The Data with `Seurat`
 Once we know what to expect from the data, let's load it! We are going to use functions from the `Seurat` package to load our tabular and image data into `R` so we can start working with it.
 
 ```{r}

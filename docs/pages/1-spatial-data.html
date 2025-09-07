@@ -201,7 +201,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#data-loading-and-exploratory-analyses" id="toc-data-loading-and-exploratory-analyses" class="nav-link" data-scroll-target="#data-loading-and-exploratory-analyses">Data Loading and Exploratory Analyses</a>
   <ul class="collapse">
   <li><a href="#what-data-are-we-going-to-use-what-is-our-question" id="toc-what-data-are-we-going-to-use-what-is-our-question" class="nav-link" data-scroll-target="#what-data-are-we-going-to-use-what-is-our-question">What data are we going to use? What is our question?</a></li>
-  <li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data">Loading The Data</a></li>
+  <li><a href="#loading-the-data-with-seurat" id="toc-loading-the-data-with-seurat" class="nav-link" data-scroll-target="#loading-the-data-with-seurat">Loading The Data with <code>Seurat</code></a></li>
   <li><a href="#adding-image-data" id="toc-adding-image-data" class="nav-link" data-scroll-target="#adding-image-data">Adding image data</a></li>
   </ul></li>
   <li><a href="#compute-custom-quality-metrics" id="toc-compute-custom-quality-metrics" class="nav-link" data-scroll-target="#compute-custom-quality-metrics">Compute custom quality metrics</a></li>
@@ -243,7 +243,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Setup</h1>
 <section id="downloading-the-workshop-contents" class="level2">
 <h2 class="anchored" data-anchor-id="downloading-the-workshop-contents">Downloading the workshop contents</h2>
-<p>In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on <a href="githubdownloadlink">this link</a>. This should trigger a file download on your system.</p>
+<p>In order to have everything ready to go through the steps of the workshop, we first need to download the required materials. To do so, click on <a href="https://github.com/paganilab/sows-2025/archive/refs/heads/master.zip">this link</a>. This should trigger a file download on your system.</p>
 <blockquote class="blockquote">
 <p>Keep track of the location of the download! We will now head into this folder using <code>R</code> through the <code>Rstudio</code> interface.</p>
 </blockquote>
@@ -300,15 +300,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="an-introduction-to-spatial-profiling-technologies" class="level1">
 <h1>An introduction to spatial profiling technologies</h1>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><embed src="./slides/spatial_intro.pdf" width="800" height="460"></p>
-</figure>
-</div>
-</div>
-</div>
+<p>Follow along on the slides for a brief intro on the kind of data we’ll be using throughout the hands-on session!</p>
 </section>
 <section id="data-loading-and-exploratory-analyses" class="level1">
 <h1>Data Loading and Exploratory Analyses</h1>
@@ -322,8 +314,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><code>matrix.mtx</code>: the actual cell-by-gene matrix with the count information</li>
 </ul>
 </section>
-<section id="loading-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="loading-the-data">Loading The Data</h2>
+<section id="loading-the-data-with-seurat" class="level2">
+<h2 class="anchored" data-anchor-id="loading-the-data-with-seurat">Loading The Data with <code>Seurat</code></h2>
 <p>Once we know what to expect from the data, let’s load it! We are going to use functions from the <code>Seurat</code> package to load our tabular and image data into <code>R</code> so we can start working with it.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data using Seurat (first set the proper data directory path)</span></span>
@@ -440,7 +432,7 @@ Key: slice1_ </code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="1-spatial-data_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="1-spatial-data_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -461,7 +453,7 @@ Key: slice1_ </code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="1-spatial-data_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="1-spatial-data_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

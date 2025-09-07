@@ -1,6 +1,6 @@
 # Spatial Omics Workshop 2025
 Here is the code needed for following along the workshop of the Summer School in Spatial Omics. 
-The website of the workshop is located [here](). This repository contains the data needed to perform all the analyses under the `data` folder.
+The website of the workshop is located [here](https://paganilab.github.io/sows-2025/). This repository contains the data needed to perform all the analyses under the `data` folder.
 
 ## Software requirements
 The workshop relies on the use of `R >= 4.4` and `python > 3.8` so make sure to have these installed. The preferred choice of IDE is `RStudio`.

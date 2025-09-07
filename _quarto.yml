@@ -14,11 +14,11 @@ website:
       - href: ./pages/0-index.Rmd
         text: Home
       - href: ./pages/1-spatial-data.Rmd
-        text: Load Spatial Data
+        text: 1. Load Spatial Data
       - href: ./pages/2-quality-control.Rmd
-        text: Quality Control
+        text: 2. Quality Control
       - href: ./pages/3-downstream.Rmd
-        text: Spatial Analyses
+        text: 3. Spatial Analyses
     right: 
       - icon: github
         href: https://github.com/paganilab

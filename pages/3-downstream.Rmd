@@ -212,7 +212,7 @@ mat <- sp@meta.data %>% select(c('celltype','custom_clusters')) %>% table()
 pheatmap::pheatmap(mat, scale='row')
 ```
 
-## Ligand-receptor activity inference with CellChat
+## Ligand-receptor activity inference with `CellChat`
 Ever since the widespread generation of scRNA-seq data, computational methods to infer cell-cell interaction events (CCI) have been developed based on co-expression of ligand- and receptor-encoding genes across clusters. Spatial techonologies deepen this analysis by giving us the chance to weight the inferred interaction by their actual spatial proximity, limiting the chance of identifying false positive results.
 
 The method that we will exploit in this part of the workshop is packaged into the [`CellChat` framework](https://github.com/jinworks/CellChat).

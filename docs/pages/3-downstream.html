@@ -193,7 +193,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#spatially-variable-genes-with-giotto" id="toc-spatially-variable-genes-with-giotto" class="nav-link" data-scroll-target="#spatially-variable-genes-with-giotto">Spatially-variable genes with <code>Giotto</code></a></li>
   <li><a href="#check-out-spatial-modules-of-expression" id="toc-check-out-spatial-modules-of-expression" class="nav-link" data-scroll-target="#check-out-spatial-modules-of-expression">Check out spatial modules of expression</a></li>
   <li><a href="#spatial-domain-identification-with-spatially-informed-clustering" id="toc-spatial-domain-identification-with-spatially-informed-clustering" class="nav-link" data-scroll-target="#spatial-domain-identification-with-spatially-informed-clustering">Spatial domain identification with spatially-informed clustering</a></li>
-  <li><a href="#ligand-receptor-activity-inference-with-cellchat" id="toc-ligand-receptor-activity-inference-with-cellchat" class="nav-link" data-scroll-target="#ligand-receptor-activity-inference-with-cellchat">Ligand-receptor activity inference with CellChat</a></li>
+  <li><a href="#ligand-receptor-activity-inference-with-cellchat" id="toc-ligand-receptor-activity-inference-with-cellchat" class="nav-link" data-scroll-target="#ligand-receptor-activity-inference-with-cellchat">Ligand-receptor activity inference with <code>CellChat</code></a></li>
   </ul>
 </nav>
     </div>
@@ -435,7 +435,7 @@ Elapsed time: 0 seconds</code></pre>
 </div>
 </section>
 <section id="ligand-receptor-activity-inference-with-cellchat" class="level2">
-<h2 class="anchored" data-anchor-id="ligand-receptor-activity-inference-with-cellchat">Ligand-receptor activity inference with CellChat</h2>
+<h2 class="anchored" data-anchor-id="ligand-receptor-activity-inference-with-cellchat">Ligand-receptor activity inference with <code>CellChat</code></h2>
 <p>Ever since the widespread generation of scRNA-seq data, computational methods to infer cell-cell interaction events (CCI) have been developed based on co-expression of ligand- and receptor-encoding genes across clusters. Spatial techonologies deepen this analysis by giving us the chance to weight the inferred interaction by their actual spatial proximity, limiting the chance of identifying false positive results.</p>
 <p>The method that we will exploit in this part of the workshop is packaged into the <a href="https://github.com/jinworks/CellChat"><code>CellChat</code> framework</a>.</p>
 <p>We first take the original <code>SeuratObject</code> and create a <code>CellChat</code> object with its own class. We first isolate raw data and import scale factors since <code>CellChat</code> takes into account spatial information, check out the steps below:</p>
@@ -563,9 +563,9 @@ $ version                  &lt;chr&gt; "CellChatDB v1", "CellChatDB v1", "CellCh
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">contact.dependent =</span> <span class="cn">TRUE</span>, <span class="at">contact.range =</span> <span class="dv">100</span>, <span class="at">nboot=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>truncatedMean is used for calculating the average gene expression per cell group. 
-[1] "&gt;&gt;&gt; Run CellChat on spatial transcriptomics data using distances as constraints of the computed communication probability &lt;&lt;&lt; [2025-09-05 16:50:18.557436]"
+[1] "&gt;&gt;&gt; Run CellChat on spatial transcriptomics data using distances as constraints of the computed communication probability &lt;&lt;&lt; [2025-09-07 18:30:59.927287]"
 Molecules of the input L-R pairs are diffusible. Run CellChat in a diffusion manner based on the `interaction.range`.
-[1] "&gt;&gt;&gt; CellChat inference is done. Parameter values are stored in `object@options$parameter` &lt;&lt;&lt; [2025-09-05 16:50:47.040365]"</code></pre>
+[1] "&gt;&gt;&gt; CellChat inference is done. Parameter values are stored in `object@options$parameter` &lt;&lt;&lt; [2025-09-07 18:31:28.401128]"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate results</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>cellchat <span class="ot">&lt;-</span> <span class="fu">aggregateNet</span>(cellchat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
