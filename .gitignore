@@ -1,5 +1,7 @@
 /.quarto/
 **/*.key
+**/*.html
 **/.DS_Store
 solutions_code.Rmd
+solutions_code_files
 **.rds

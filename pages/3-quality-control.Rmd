@@ -50,8 +50,11 @@ Filtering can be performed in many ways and using combinations of covariates to 
 Once we have our filtering values sorted out, we need to actually filter our _bad_ spots. Firstly though, since we are dealing with spatial data, we want to check whether the filtering we are applying could end up tampering with the original spatial organization of the sample!
 
 **Q2.** Determine a quantile-based approach to filter spots based on the `nCount_Visium10X` and `nFeature_Visium10X` columns, keeping only spots above the 10% percentile for both measures (let's call them `genesq` for the number of genes and `umisq` for the number of counts, we'll use these later!) - _hint_: use the `quantile` function.
+
 **Q3.** Compute an additional `meta.data` column named `to_keep` which contains values `Keep` or `Discard`. If a spot passes QC then gets assigned a `Keep` else it is flagged by a `Discard`. (_hint_: check out the `mutate` and `ifelse` function to create the column)
+
 **Q4.** Plot the new column over the sample and check where spots that would be discarded are located
+
 **Q5.** How many spots would be filtered out?
 
 ```{r, include=FALSE}
@@ -91,7 +94,9 @@ Now that we have our filtered dataset, we are ready to start working on the spot
 To do so, try to implement the following steps in your code:
 
 **Q6.** Use the `FindVariableFeatures` function from the `Seurat` package to detect highly-variable genes in the data and keep the top 4,000 genes using the `vst` method
+
 **Q7.** Check which are the top 10 most variable genes in the data (_hint_: try a combination of the `head` and `VariableFeatures` function)
+
 **Q8.** Plot the names of the top 50 highly-variable genes like shown below (_hint_: use the `VariableFeaturePlot` function)
 
 ```{r, include=FALSE}
@@ -143,6 +148,7 @@ sp <- RunPCA(sp, features = VariableFeatures(object = sp))
 ```
 
 **Q9.** How many PCs are computed by default?
+
 **Q10.** Which are the top 10 genes contributing to the first 3 PCs (based on their loadings, _hint_: use the `VizDimLoadings` function)?
 
 Great! We can now plot our spots in PCA space:
@@ -216,7 +222,10 @@ sp <- FindClusters(sp, resolution = 0.8)
 ```
 
 **Q14.** How many clusters do you get?
+
+
 **Q15.** How many spots do we have per cluster on average?
+
 **Q16.** Represent cluster identities on a UMAP and on a spatial plot, does this match your expectation? Do you see clusters also grouping spatially?
 
 ```{r, echo=FALSE}

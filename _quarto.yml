@@ -13,12 +13,14 @@ website:
     left:
       - href: ./pages/0-index.Rmd
         text: Home
-      - href: ./pages/1-spatial-data.Rmd
-        text: 1. Load Spatial Data
-      - href: ./pages/2-quality-control.Rmd
-        text: 2. Quality Control
-      - href: ./pages/3-downstream.Rmd
-        text: 3. Spatial Analyses
+      - href: ./pages/1-setup.Rmd
+        text: 1. Setup
+      - href: ./pages/2-spatial-data.Rmd
+        text: 2. Load Spatial Data
+      - href: ./pages/3-quality-control.Rmd
+        text: 3. Quality Control
+      - href: ./pages/4-downstream.Rmd
+        text: 4. Spatial Analyses
     right: 
       - icon: github
         href: https://github.com/paganilab
