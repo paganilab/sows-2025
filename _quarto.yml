@@ -11,7 +11,7 @@ website:
   navbar:
     logo: ./src/icon.png
     left:
-      - href: ./pages/0-index.Rmd
+      - href: ./pages/index.Rmd
         text: Home
       - href: ./pages/1-setup.Rmd
         text: 1. Setup
