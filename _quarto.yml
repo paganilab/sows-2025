@@ -15,11 +15,11 @@ website:
         text: Home
       - href: ./pages/setup.Rmd
         text: 1. Setup
-      - href: ./pages/t-spatial-data.Rmd
+      - href: ./pages/spatial-data.Rmd
         text: 2. Load Spatial Data
-      - href: ./pages/u-quality-control.Rmd
+      - href: ./pages/quality-control.Rmd
         text: 3. Quality Control
-      - href: ./pages/v-downstream.Rmd
+      - href: ./pages/downstream.Rmd
         text: 4. Spatial Analyses
     right: 
       - icon: github
