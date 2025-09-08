@@ -13,13 +13,13 @@ website:
     left:
       - href: ./pages/index.Rmd
         text: Home
-      - href: ./pages/1-setup.Rmd
+      - href: ./pages/setup.Rmd
         text: 1. Setup
-      - href: ./pages/2-spatial-data.Rmd
+      - href: ./pages/t-spatial-data.Rmd
         text: 2. Load Spatial Data
-      - href: ./pages/3-quality-control.Rmd
+      - href: ./pages/u-quality-control.Rmd
         text: 3. Quality Control
-      - href: ./pages/4-downstream.Rmd
+      - href: ./pages/v-downstream.Rmd
         text: 4. Spatial Analyses
     right: 
       - icon: github
