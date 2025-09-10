@@ -3,6 +3,4 @@
 ./*.html
 **/.DS_Store
 solutions_code.Rmd
-solutions_code.html
-solutions_code_files
 **.rds

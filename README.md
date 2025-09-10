@@ -9,4 +9,7 @@ The workshop relies on the use of `R >= 4.4` and `python > 3.8` so make sure to 
 Download all the course material on your computer using the [following link](https://github.com/paganilab/sows-2025/archive/refs/heads/master.zip). Unzip the contents of the folder in your preferred location and navigate to it using the `RStudio` file interface.
 
 ## Debugging and troubleshooting
-Please refere to the help page on the website for any known debugging steps during software installation phases.
+Please refer to the help page on the website for any known debugging steps during software installation phases.
+
+## Solutions
+Solutions to the questions of each section of the hands-on can be found in the `solutions_code.html` file.
